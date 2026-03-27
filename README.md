@@ -83,3 +83,13 @@ tests/e2e/                  # Playwright E2E
 - 距离下一次周年的剩余天数
 
 原因很简单：这些值每天都会变，存下来只会腐烂。
+
+## 部署
+
+项目使用 GitHub Pages 托管静态站点，并由 GitHub Actions 自动发布。
+
+- 推送到 `master` 后，GitHub Actions 会自动执行依赖安装、构建和 Pages 部署
+- Pages 发布目标地址：`https://virtuede.github.io/day-matter/`
+- 仓库 Pages 来源应设置为 `GitHub Actions`
+
+历史上的 `gh-pages` 分支可保留用于回溯，但不再作为新的正式发布来源。
