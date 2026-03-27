@@ -40,7 +40,7 @@ export function AnniversarySummary({ summary }: AnniversarySummaryProps) {
       <div className="hero__content">
         <p className="hero__eyebrow">纪念日 Daymark</p>
         <h1 className="hero__title" id="hero-title">
-          让重要的日子，不只被记住一次。
+          让重要的日子，被时间温柔记住。
         </h1>
         <p className="hero__copy">{summary.heroMessage}</p>
         <div className="hero__moment" role="group" aria-label="当前时间信息">

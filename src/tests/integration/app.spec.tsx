@@ -7,7 +7,7 @@ describe('App', () => {
   it('首页加载后展示主结构', () => {
     renderApp();
 
-    expect(screen.getByRole('heading', { level: 1, name: '让重要的日子，不只被记住一次。' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: '让重要的日子，被时间温柔记住。' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: /名称和日期就够了/ })).toBeInTheDocument();
     expect(screen.getByRole('main')).toBeInTheDocument();
   });
