@@ -72,6 +72,11 @@ input {
   gap: 24px;
 }
 
+.hero__content {
+  display: grid;
+  gap: 16px;
+}
+
 .hero__eyebrow,
 .panel__eyebrow,
 .list-panel__eyebrow,
@@ -107,6 +112,45 @@ input {
 .dialog__copy {
   color: var(--color-muted);
   line-height: 1.7;
+}
+
+.hero__copy {
+  margin: 0;
+}
+
+.hero__moment {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.hero__moment-item {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(183, 121, 69, 0.14), rgba(255, 255, 255, 0.82));
+  border: 1px solid rgba(183, 121, 69, 0.22);
+}
+
+.hero__moment-label {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.hero__moment-value {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.hero__moment-value--small {
+  font-size: clamp(1.1rem, 2.6vw, 1.4rem);
 }
 
 .hero__metrics {
@@ -412,7 +456,8 @@ input {
 
 @media (max-width: 1023px) {
   .workspace,
-  .hero__metrics {
+  .hero__metrics,
+  .hero__moment {
     grid-template-columns: 1fr;
   }
 
@@ -440,6 +485,11 @@ input {
 
   .hero__title {
     max-width: none;
+  }
+
+  .hero__moment-item {
+    padding: 14px 16px;
+    border-radius: 20px;
   }
 
   .form__actions,
