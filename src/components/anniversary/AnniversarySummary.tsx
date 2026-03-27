@@ -8,7 +8,7 @@ export function AnniversarySummary({ summary }: AnniversarySummaryProps) {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero__content">
-        <p className="hero__eyebrow">纪日 Daymark</p>
+        <p className="hero__eyebrow">纪念日 Daymark</p>
         <h1 className="hero__title" id="hero-title">
           让重要的日子，不只被记住一次。
         </h1>
@@ -36,4 +36,3 @@ export function AnniversarySummary({ summary }: AnniversarySummaryProps) {
     </section>
   );
 }
-
