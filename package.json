@@ -11,7 +11,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:integration": "vitest run src/tests/integration",
-    "test:e2e": "playwright test"
+    "test:e2e": "pnpm build && playwright test"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTodayISO, isFutureDate } from '../../lib/date/normalize';
 import { clearRecords, loadRecords, saveRecords } from '../../storage/anniversaryStorage';
 import { buildAnniversarySummary, selectAnniversaryViews } from './selectors';
-import type { AnniversaryFormErrors, AnniversaryFormInput, AnniversaryRecord } from './types';
+import type {
+  AnniversaryFilterState,
+  AnniversaryFormErrors,
+  AnniversaryFormInput,
+  AnniversaryRecord,
+} from './types';
 
 interface ToastState {
   id: number;
@@ -42,6 +47,10 @@ export function validateAnniversaryFormInput(
 
 export function useAnniversaries() {
   const [records, setRecords] = useState<AnniversaryRecord[]>(() => loadRecords());
+  const [filterState, setFilterState] = useState<AnniversaryFilterState>({
+    archive: 'active',
+    category: 'all',
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const deleteTriggerRef = useRef<HTMLElement | null>(null);
@@ -63,8 +72,11 @@ export function useAnniversaries() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const views = useMemo(() => selectAnniversaryViews(records), [records]);
-  const summary = useMemo(() => buildAnniversarySummary(views), [views]);
+  const views = useMemo(() => selectAnniversaryViews(records, undefined, filterState), [filterState, records]);
+  const summary = useMemo(
+    () => buildAnniversarySummary(views, records, filterState),
+    [filterState, records, views],
+  );
   const editingRecord = useMemo(
     () => records.find((record) => record.id === editingId) ?? null,
     [editingId, records],
@@ -94,6 +106,7 @@ export function useAnniversaries() {
                 ...record,
                 title: normalizedTitle,
                 baseDateISO: input.baseDateISO,
+                category: input.category,
                 updatedAtISO: nowISO,
               }
             : record,
@@ -106,6 +119,8 @@ export function useAnniversaries() {
           id: createRecordId(),
           title: normalizedTitle,
           baseDateISO: input.baseDateISO,
+          category: input.category,
+          archivedAtISO: null,
           createdAtISO: nowISO,
           updatedAtISO: nowISO,
         },
@@ -127,6 +142,55 @@ export function useAnniversaries() {
 
   function cancelEdit() {
     setEditingId(null);
+  }
+
+  function setArchiveFilter(nextArchive: AnniversaryFilterState['archive']) {
+    setFilterState((currentState) => ({
+      ...currentState,
+      archive: nextArchive,
+    }));
+  }
+
+  function setCategoryFilter(nextCategory: AnniversaryFilterState['category']) {
+    setFilterState((currentState) => ({
+      ...currentState,
+      category: nextCategory,
+    }));
+  }
+
+  function archiveRecord(recordId: string) {
+    const nowISO = new Date().toISOString();
+
+    setRecords((currentRecords) =>
+      currentRecords.map((record) =>
+        record.id === recordId
+          ? {
+              ...record,
+              archivedAtISO: nowISO,
+              updatedAtISO: nowISO,
+            }
+          : record,
+      ),
+    );
+    setEditingId((currentEditingId) => (currentEditingId === recordId ? null : currentEditingId));
+    queueToast('纪念日已归档。', 'success');
+  }
+
+  function restoreRecord(recordId: string) {
+    const nowISO = new Date().toISOString();
+
+    setRecords((currentRecords) =>
+      currentRecords.map((record) =>
+        record.id === recordId
+          ? {
+              ...record,
+              archivedAtISO: null,
+              updatedAtISO: nowISO,
+            }
+          : record,
+      ),
+    );
+    queueToast('纪念日已恢复到活跃列表。', 'success');
   }
 
   function requestDelete(recordId: string, trigger?: HTMLElement | null) {
@@ -162,6 +226,10 @@ export function useAnniversaries() {
     setRecords([]);
     setEditingId(null);
     setPendingDeleteId(null);
+    setFilterState({
+      archive: 'active',
+      category: 'all',
+    });
   }
 
   return {
@@ -171,14 +239,18 @@ export function useAnniversaries() {
     editingRecord,
     pendingDeleteRecord,
     toast,
-    hasRecords: views.length > 0,
+    filterState,
+    hasRecords: records.length > 0,
     submitRecord,
     startEdit,
     cancelEdit,
+    setArchiveFilter,
+    setCategoryFilter,
+    archiveRecord,
+    restoreRecord,
     requestDelete,
     closeDeleteDialog,
     confirmDelete,
     resetAll,
   };
 }
-

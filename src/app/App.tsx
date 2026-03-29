@@ -9,12 +9,17 @@ import { useAnniversaries } from '../features/anniversaries/useAnniversaries';
 export function App() {
   const titleInputRef = useRef<HTMLInputElement | null>(null);
   const {
+    archiveRecord,
     confirmDelete,
     closeDeleteDialog,
+    filterState,
     editingRecord,
     hasRecords,
     pendingDeleteRecord,
     requestDelete,
+    restoreRecord,
+    setArchiveFilter,
+    setCategoryFilter,
     startEdit,
     submitRecord,
     summary,
@@ -42,10 +47,16 @@ export function App() {
           </aside>
           <section className="workspace__main">
             <AnniversaryList
+              filterState={filterState}
+              hasRecords={hasRecords}
+              onArchive={archiveRecord}
+              onArchiveFilterChange={setArchiveFilter}
+              onCategoryFilterChange={setCategoryFilter}
               views={views}
               onDelete={requestDelete}
               onEdit={startEdit}
               onEmptyAction={focusCreateForm}
+              onRestore={restoreRecord}
             />
           </section>
         </section>
@@ -60,4 +71,3 @@ export function App() {
     </div>
   );
 }
-

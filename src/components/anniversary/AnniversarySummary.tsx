@@ -43,41 +43,33 @@ export function AnniversarySummary({ summary }: AnniversarySummaryProps) {
           让重要的日子，被时间温柔记住。
         </h1>
         <p className="hero__copy">{summary.heroMessage}</p>
-        <div className="hero__moment" role="group" aria-label="当前时间信息">
-          <div className="hero__moment-item">
-            <span className="hero__moment-label">当前时间</span>
-            <strong className="hero__moment-value">{formatCurrentTime(currentMoment)}</strong>
-          </div>
-          <div className="hero__moment-item">
-            <span className="hero__moment-label">当前日期</span>
-            <strong className="hero__moment-value hero__moment-value--small">
-              {formatCurrentDate(currentMoment)}
-            </strong>
-          </div>
-          <div className="hero__moment-item">
-            <span className="hero__moment-label">农历</span>
-            <strong className="hero__moment-value hero__moment-value--small">
-              {formatLunarDate(currentMoment)}
-            </strong>
-          </div>
-        </div>
+        <p className="hero__scope">{summary.scopeLabel}</p>
+        <p className="hero__meta">
+          当前时间 {formatCurrentTime(currentMoment)} · {formatCurrentDate(currentMoment)} · {formatLunarDate(currentMoment)}
+        </p>
       </div>
       <div className="hero__metrics">
-        <article className="metric-card">
-          <span className="metric-card__label">总记录数</span>
-          <strong className="metric-card__value">{summary.totalCount}</strong>
-        </article>
-        <article className="metric-card">
-          <span className="metric-card__label">今天正在纪念</span>
-          <strong className="metric-card__value">{summary.todayCount}</strong>
-        </article>
         <article className="metric-card metric-card--wide">
-          <span className="metric-card__label">最近的周年</span>
+          <span className="metric-card__label">当前焦点</span>
           <strong className="metric-card__value metric-card__value--compact">
-            {summary.upcomingRecord ? summary.upcomingRecord.title : '还没有记录'}
+            {summary.spotlightRecord ? summary.spotlightRecord.title : '还没有记录'}
           </strong>
           <span className="metric-card__hint">
-            {summary.upcomingRecord ? summary.upcomingRecord.countdownLabel : '先创建第一条纪念日'}
+            {summary.spotlightRecord ? summary.spotlightRecord.countdownLabel : '先创建第一条纪念日'}
+          </span>
+        </article>
+        <article className="metric-card">
+          <span className="metric-card__label">当前可见</span>
+          <strong className="metric-card__value">{summary.visibleCount}</strong>
+          <span className="metric-card__hint">活跃 {summary.activeCount} · 已归档 {summary.archivedCount}</span>
+        </article>
+        <article className="metric-card">
+          <span className="metric-card__label">30 天内将到来</span>
+          <strong className="metric-card__value">{summary.upcomingCount}</strong>
+          <span className="metric-card__hint">
+            {summary.categoryBreakdown[0]
+              ? `当前最多的是${summary.categoryBreakdown[0].label} · ${summary.categoryBreakdown[0].count}条`
+              : '先写下一条，你的时间册就会开始成形'}
           </span>
         </article>
       </div>

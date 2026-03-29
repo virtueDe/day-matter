@@ -1,10 +1,14 @@
-import { useEffect, useState, type FormEvent, type RefObject } from 'react';
-import { getTodayISO } from '../../lib/date/normalize';
+import { useEffect, useMemo, useState, type FormEvent, type RefObject } from 'react';
+import { ANNIVERSARY_CATEGORY_OPTIONS, DEFAULT_ANNIVERSARY_CATEGORY } from '../../features/anniversaries/categories';
+import { buildAnniversaryPreview } from '../../features/anniversaries/selectors';
+import { getTodayISO, isFutureDate } from '../../lib/date/normalize';
 import { validateAnniversaryFormInput } from '../../features/anniversaries/useAnniversaries';
 import type { AnniversaryFormErrors, AnniversaryFormInput, AnniversaryRecord } from '../../features/anniversaries/types';
+import { AnniversaryPreview } from './AnniversaryPreview';
 import { Button } from '../common/Button';
 import { DateField } from '../common/DateField';
 import { InlineMessage } from '../common/InlineMessage';
+import { SelectField } from '../common/SelectField';
 import { TextField } from '../common/TextField';
 
 interface AnniversaryFormProps {
@@ -17,6 +21,7 @@ interface AnniversaryFormProps {
 const EMPTY_FORM: AnniversaryFormInput = {
   title: '',
   baseDateISO: '',
+  category: DEFAULT_ANNIVERSARY_CATEGORY,
 };
 
 export function AnniversaryForm({
@@ -33,6 +38,7 @@ export function AnniversaryForm({
       setFormState({
         title: editingRecord.title,
         baseDateISO: editingRecord.baseDateISO,
+        category: editingRecord.category,
       });
       setErrors({});
       return;
@@ -43,6 +49,8 @@ export function AnniversaryForm({
   }, [editingRecord]);
 
   const isEditing = Boolean(editingRecord);
+  const preview = useMemo(() => buildAnniversaryPreview(formState), [formState]);
+  const previewStatus = formState.baseDateISO && isFutureDate(formState.baseDateISO) ? 'invalid' : 'idle';
 
   function handleChange<Key extends keyof AnniversaryFormInput>(key: Key, value: AnniversaryFormInput[Key]) {
     setFormState((currentState) => ({
@@ -69,6 +77,7 @@ export function AnniversaryForm({
     onSubmit({
       title: formState.title.trim(),
       baseDateISO: formState.baseDateISO,
+      category: formState.category,
     });
 
     if (!isEditing) {
@@ -105,7 +114,16 @@ export function AnniversaryForm({
             value={formState.baseDateISO}
             onChange={(event) => handleChange('baseDateISO', event.currentTarget.value)}
           />
+          <SelectField
+            id="anniversary-category"
+            label="纪念日分类"
+            name="category"
+            options={ANNIVERSARY_CATEGORY_OPTIONS}
+            value={formState.category}
+            onChange={(event) => handleChange('category', event.currentTarget.value as AnniversaryFormInput['category'])}
+          />
         </div>
+        <AnniversaryPreview preview={preview} status={previewStatus} />
         <InlineMessage>首版只支持过去或今天的日期，默认按最近周年自动排序。</InlineMessage>
         <div className="form__actions">
           {isEditing ? (

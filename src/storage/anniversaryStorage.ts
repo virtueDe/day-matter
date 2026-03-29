@@ -1,8 +1,32 @@
-import type { AnniversaryRecord, AnniversaryStoreV1 } from '../features/anniversaries/types';
+import { DEFAULT_ANNIVERSARY_CATEGORY } from '../features/anniversaries/categories';
+import type {
+  AnniversaryRecord,
+  AnniversaryRecordV1,
+  AnniversaryStoreV1,
+  AnniversaryStoreV2,
+} from '../features/anniversaries/types';
 
 export const ANNIVERSARY_STORAGE_KEY = 'daymark.records.v1';
 
 function isAnniversaryRecord(value: unknown): value is AnniversaryRecord {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+
+  return (
+    typeof record.id === 'string' &&
+    typeof record.title === 'string' &&
+    typeof record.baseDateISO === 'string' &&
+    typeof record.category === 'string' &&
+    (record.archivedAtISO === null || typeof record.archivedAtISO === 'string') &&
+    typeof record.createdAtISO === 'string' &&
+    typeof record.updatedAtISO === 'string'
+  );
+}
+
+function isAnniversaryRecordV1(value: unknown): value is AnniversaryRecordV1 {
   if (!value || typeof value !== 'object') {
     return false;
   }
@@ -25,7 +49,29 @@ function isAnniversaryStoreV1(value: unknown): value is AnniversaryStoreV1 {
 
   const store = value as Record<string, unknown>;
 
-  return store.version === 1 && Array.isArray(store.records) && store.records.every(isAnniversaryRecord);
+  return store.version === 1 && Array.isArray(store.records) && store.records.every(isAnniversaryRecordV1);
+}
+
+function isAnniversaryStoreV2(value: unknown): value is AnniversaryStoreV2 {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const store = value as Record<string, unknown>;
+
+  return store.version === 2 && Array.isArray(store.records) && store.records.every(isAnniversaryRecord);
+}
+
+function migrateRecord(record: AnniversaryRecordV1): AnniversaryRecord {
+  return {
+    id: record.id,
+    title: record.title,
+    baseDateISO: record.baseDateISO,
+    category: DEFAULT_ANNIVERSARY_CATEGORY,
+    archivedAtISO: null,
+    createdAtISO: record.createdAtISO,
+    updatedAtISO: record.updatedAtISO,
+  };
 }
 
 function resolveStorage(storage?: Storage): Storage | null {
@@ -56,7 +102,15 @@ export function loadRecords(storage?: Storage): AnniversaryRecord[] {
   try {
     const parsed = JSON.parse(rawValue) as unknown;
 
-    return isAnniversaryStoreV1(parsed) ? parsed.records : [];
+    if (isAnniversaryStoreV2(parsed)) {
+      return parsed.records;
+    }
+
+    if (isAnniversaryStoreV1(parsed)) {
+      return parsed.records.map(migrateRecord);
+    }
+
+    return [];
   } catch {
     return [];
   }
@@ -69,12 +123,14 @@ export function saveRecords(records: AnniversaryRecord[], storage?: Storage): vo
     return;
   }
 
-  const store: AnniversaryStoreV1 = {
-    version: 1,
+  const store: AnniversaryStoreV2 = {
+    version: 2,
     records: records.map((record) => ({
       id: record.id,
       title: record.title,
       baseDateISO: record.baseDateISO,
+      category: record.category,
+      archivedAtISO: record.archivedAtISO,
       createdAtISO: record.createdAtISO,
       updatedAtISO: record.updatedAtISO,
     })),
@@ -92,4 +148,3 @@ export function clearRecords(storage?: Storage): void {
 
   target.removeItem(ANNIVERSARY_STORAGE_KEY);
 }
-
